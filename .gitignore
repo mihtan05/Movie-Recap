@@ -1,0 +1,29 @@
+# Python virtual environment & bytecode
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node build tooling (used only to bundle single-file MCP App HTML)
+ui_builder/node_modules/
+ui_builder/package-lock.json
+
+# ZERO LOCAL STORAGE: Never commit temporary video buffers, renders, or media caches
+temp_cache/
+projects_buffer/
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.wav
+*.mp3
+*.aac
+*.m4a
+*.srt
+*.kdenlive
+*.mlt
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.env

@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Movie Recap Studio</title>
+  <style>
+    @property --fade-start {
+      syntax: "<length>";
+      inherits: false;
+      initial-value: 0px;
+    }
+
+    @property --fade-end {
+      syntax: "<length>";
+      inherits: false;
+      initial-value: 0px;
+    }
+
+    :root {
+      --brand-light: #0055d4;
+      --brand-dark: #58a6ff;
+      --brand-on-light: #ffffff;
+      --brand-on-dark: #07192e;
+
+      --brand-color: var(--brand-light);
+      --brand-contrast: var(--brand-on-light);
+      --surface-bg: var(--color-background-primary, #ffffff);
+      --surface-card: var(--color-background-secondary, #f4f6f9);
+      --surface-elevated: var(--color-background-tertiary, #e9edf3);
+      --text-main: var(--color-text-primary, #16191f);
+      --text-muted: var(--color-text-secondary, #535c68);
+      --border-subtle: var(--color-border-primary, #d4dae3);
+      --ok-color: var(--color-text-success, #137333);
+      --warn-color: var(--color-text-warning, #b06000);
+      --danger-color: var(--color-text-danger, #c5221f);
+      --scrollbar-track: #eceff4;
+      --scrollbar-thumb: #68707d;
+
+      @media (prefers-color-scheme: dark) {
+        --brand-color: var(--brand-dark);
+        --brand-contrast: var(--brand-on-dark);
+        --surface-bg: var(--color-background-primary, #12151b);
+        --surface-card: var(--color-background-secondary, #1a1f29);
+        --surface-elevated: var(--color-background-tertiary, #232a38);
+        --text-main: var(--color-text-primary, #eef2f7);
+        --text-muted: var(--color-text-secondary, #9aa4b2);
+        --border-subtle: var(--color-border-primary, #2e3748);
+        --ok-color: var(--color-text-success, #5bb974);
+        --warn-color: var(--color-text-warning, #fdd663);
+        --danger-color: var(--color-text-danger, #f28b82);
+        --scrollbar-track: #181c24;
+        --scrollbar-thumb: #7b8698;
+      }
+
+      @supports (color: light-dark(white, black)) {
+        --brand-color: light-dark(var(--brand-light), var(--brand-dark));
+        --brand-contrast: light-dark(var(--brand-on-light), var(--brand-on-dark));
+        --scrollbar-track: light-dark(#eceff4, #181c24);
+        --scrollbar-thumb: light-dark(#68707d, #7b8698);
+      }
+
+      color-scheme: light dark;
+      accent-color: var(--brand-color);
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
+
+    @supports not (scrollbar-color: auto) {
+      .scroller {
+        scrollbar-width: auto;
+      }
+      .scroller::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .scroller::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+      }
+      .scroller::-webkit-scrollbar-track {
+        background: var(--scrollbar-track);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--surface-bg);
+      color: var(--text-main);
+      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .studio-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .badge.ok {
+      color: var(--ok-color);
+    }
+
+    .badge.warn {
+      color: var(--warn-color);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    select, input[type="text"], input[type="number"], textarea {
+      background: var(--surface-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 6px 9px;
+      font: inherit;
+    }
+
+    select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible {
+      outline: 2px solid var(--brand-color);
+      outline-offset: 1px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-elevated);
+      color: var(--text-main);
+      border-radius: 7px;
+      padding: 6px 10px;
+      font: inherit;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(1.06);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      background: var(--brand-color);
+      color: var(--brand-contrast);
+      border-color: transparent;
+    }
+
+    button.danger {
+      color: var(--danger-color);
+      border-color: var(--danger-color);
+      background: transparent;
+    }
+
+    .notice-banner {
+      padding: 8px 11px;
+      border-radius: 8px;
+      background: var(--surface-card);
+      border-inline-start: 4px solid var(--brand-color);
+      font-size: 12px;
+      display: none;
+    }
+
+    .notice-banner.visible {
+      display: block;
+    }
+
+    /* Media Preview Dock */
+    .player-dock {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .video-wrap {
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      max-height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      color-scheme: dark;
+      accent-color: var(--brand-color);
+    }
+
+    .video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .player-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Accessible Tabs (modern-web-guidance `tabs` pattern) */
+    .tabs {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tablist.scroller {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: inline proximity;
+      scroll-padding-inline: 2.5rem;
+      border-block-end: 1px solid var(--border-subtle);
+      scrollbar-width: none;
+      --fade-size: 2.5rem;
+      --fade-dir: right;
+      --fade-start-pos: 0;
+      --fade-end-pos: 100%;
+      mask:
+        linear-gradient(black, black) no-clip subtract,
+        linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 / var(--fade-start) 100% no-repeat no-clip,
+        linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 / var(--fade-end) 100% no-repeat no-clip;
+      animation: reveal-fade-start linear both, hide-fade-end linear both;
+      animation-timeline: scroll(self inline);
+      animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+    }
+
+    .tablist.scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tablist.scroller.more-start {
+      --fade-start: var(--fade-size);
+    }
+
+    .tablist.scroller.more-end {
+      --fade-end: var(--fade-size);
+    }
+
+    @keyframes reveal-fade-start {
+      to { --fade-start: var(--fade-size); }
+    }
+
+    @keyframes hide-fade-end {
+      from { --fade-end: var(--fade-size); }
+    }
+
+    .tablist button {
+      flex: none;
+      scroll-snap-align: start;
+      position: relative;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      padding: 9px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .tablist button[aria-selected="true"] {
+      color: var(--brand-color);
+    }
+
+    .tablist button[aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      border-block-end: 3px solid var(--brand-color);
+    }
+
+    .tabpanels-stack {
+      display: grid;
+    }
+
+    [role="tabpanel"] {
+      grid-area: 1 / 1;
+    }
+
+    /* All padding/border/background live on child wrapper, NEVER on [role="tabpanel"] */
+    .panel-inner {
+      padding-block: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chapter-card, .section-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chapter-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .block-item {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .block-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .block-item textarea {
+      width: 100%;
+      min-height: 52px;
+      resize: vertical;
+    }
+
+    .block-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .char-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .storyboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .storyboard-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface-bg);
+    }
+
+    .storyboard-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+
+    .storyboard-card div {
+      padding: 4px 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Progressive enhancement fallback for browsers without accent-color */
+    @supports not (accent-color: var(--brand-color)) {
+      input[type="checkbox"].visually-hidden {
+        position: absolute !important;
+        clip-path: inset(50%) !important;
+        overflow: hidden !important;
+        width: 1px !important;
+        height: 1px !important;
+        margin: -1px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        white-space: nowrap !important;
+      }
+      label.check-label {
+        position: relative;
+        padding-left: 1.8rem;
+      }
+      input[type="checkbox"] + span::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.1rem;
+        height: 1.1rem;
+        border: 2px solid #888;
+        background: white;
+        border-radius: 4px;
+      }
+      input[type="checkbox"]:focus-visible + span::before {
+        outline: 2px solid var(--brand-color);
+        outline-offset: 2px;
+      }
+      input[type="checkbox"]:checked + span::before {
+        background-color: var(--brand-color, #0055d4);
+        border-color: var(--brand-color, #0055d4);
+      }
+      input[type="checkbox"]:checked + span::after {
+        content: "✓";
+        position: absolute;
+        left: 0.22rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: white;
+        font-weight: bold;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Native Modal Dialog (`dialog` pattern) */
+    dialog {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      background: var(--surface-card);
+      color: var(--text-main);
+      padding: 16px 18px;
+      max-width: 400px;
+      width: calc(100% - 24px);
+    }
+
+    dialog h1 {
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+
+    dialog p {
+      margin: 0 0 14px;
+      color: var(--text-muted);
+    }
+
+    dialog .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    dialog:modal {
+      overscroll-behavior: contain;
+    }
+
+    dialog::backdrop {
+      background: rgb(0 0 0 / 0.55);
+      overflow: hidden;
+      overscroll-behavior: contain;
+    }
+
+    .drive-links a {
+      color: var(--brand-color);
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .empty-box {
+      padding: 18px;
+      text-align: center;
+      color: var(--text-muted);
+      border: 1px dashed var(--border-subtle);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="studio-shell">
+    <header class="topbar">
+      <div class="brand-row">
+        <span>🎬 Movie Recap Studio</span>
+        <select id="project-select" aria-label="Chọn dự án phim"></select>
+        <button type="button" id="btn-refresh" title="Làm mới dữ liệu">🔄</button>
+      </div>
+      <div class="badges">
+        <span class="badge" id="gpu-badge">GPU: Đang kiểm tra...</span>
+        <span class="badge" id="cache-badge">Đệm D:\CLIP: 0 MB</span>
+      </div>
+    </header>
+
+    <div id="notice-banner" class="notice-banner" role="status" aria-live="polite"></div>
+
+    <section class="player-dock" aria-label="Trình xem trước Video và Âm thanh">
+      <div class="video-wrap" id="video-container">
+        <video id="main-player" controls preload="metadata"></video>
+      </div>
+      <div class="player-meta">
+        <span id="now-playing-label">Chưa chọn cảnh/chương phát xem trước</span>
+        <div class="toolbar">
+          <button type="button" id="btn-play-full" disabled>▶ Xem bản Full MP4</button>
+          <button type="button" id="btn-prompt-new" class="primary">✨ Giao AI làm phim mới ở Chat</button>
+        </div>
+      </div>
+      <audio id="audio-player" controls style="width:100%; height:32px; display:none;"></audio>
+    </section>
+
+    <div class="tabs">
+      <div class="tablist scroller" id="studio-tablist" focusgroup="tablist nomemory" role="tablist" aria-label="Các bảng điều khiển dựng phim">
+        <button type="button" role="tab" id="tab-chapters" aria-selected="true" focusgroupstart>📑 Chương &amp; Cảnh</button>
+        <button type="button" role="tab" id="tab-bible" aria-selected="false">🎭 Từ điển &amp; Storyboard</button>
+        <button type="button" role="tab" id="tab-export" aria-selected="false">🚀 Xuất Video &amp; Google Drive</button>
+      </div>
+
+      <div class="tabpanels-stack">
+        <div role="tabpanel" id="panel-chapters" aria-labelledby="tab-chapters">
+          <div class="panel-inner" id="chapters-container">
+            <div class="empty-box">Đang tải dự án...</div>
+          </div>
+        </div>
+
+        <div role="tabpanel" id="panel-bible" aria-labelledby="tab-bible" hidden="until-found">
+          <div class="panel-inner">
+            <div class="section-card">
+              <div class="chapter-header">
+                <strong>Từ điển Nhân vật thống nhất (Character Bible)</strong>
+                <div class="toolbar">
+                  <button type="button" id="btn-add-char">+ Thêm nhân vật</button>
+                  <button type="button" id="btn-save-char" class="primary">💾 Lưu Từ điển</button>
+                </div>
+              </div>
+              <div id="char-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+            </div>
+
+            <div class="section-card">
+              <div class="chapter-header">
+                <strong>Bảng ảnh Storyboard 5x5 (0đ API - Có mã giờ HH:MM:SS)</strong>
+                <button type="button" id="btn-gen-storyboard">🖼️ Tạo Storyboard từ phim gốc</button>
+              </div>
+              <div id="storyboard-list" class="storyboard-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div role="tabpanel" id="panel-export" aria-labelledby="tab-export" hidden="until-found">
+          <div class="panel-inner">
+            <div class="section-card">
+              <strong>Cấu hình Giọng đọc &amp; Xuất Video</strong>
+              <div class="form-row">
+                <label>
+                  <div>Giọng đọc AI (Miễn phí):</div>
+                  <select id="cfg-voice" style="width:100%; margin-top:4px;"></select>
+                </label>
+                <label>
+                  <div>Tốc độ đọc (VD: +14%):</div>
+                  <input type="text" id="cfg-rate" value="+14%" style="width:100%; margin-top:4px;">
+                </label>
+                <label>
+                  <div>Khung hình:</div>
+                  <select id="cfg-aspect" style="width:100%; margin-top:4px;">
+                    <option value="16:9">16:9 Ngang (YouTube 45-60p)</option>
+                    <option value="9:16">9:16 Dọc (Shorts / Reels / TikTok)</option>
+                  </select>
+                </label>
+                <label>
+                  <div>Thư mục trên Google Drive:</div>
+                  <input type="text" id="cfg-drive-folder" value="Movie Recap Studio" style="width:100%; margin-top:4px;">
+                </label>
+              </div>
+
+              <div style="display:flex; flex-wrap:wrap; gap:14px; margin-top:6px;">
+                <label class="check-label" for="cfg-burn-sub">
+                  <input type="checkbox" id="cfg-burn-sub" class="visually-hidden">
+                  <span>Đóng cứng phụ đề lên hình (Hardsub)</span>
+                </label>
+                <label class="check-label" for="cfg-nvenc">
+                  <input type="checkbox" id="cfg-nvenc" class="visually-hidden" checked>
+                  <span>Tăng tốc render bằng NVIDIA NVENC GPU</span>
+                </label>
+                <label class="check-label" for="cfg-autoclean">
+                  <input type="checkbox" id="cfg-autoclean" class="visually-hidden" checked>
+                  <span>Tự xóa sạch file nháp ở D:\CLIP về 0 MB sau khi lên Drive</span>
+                </label>
+              </div>
+
+              <div class="toolbar" style="margin-top:6px;">
+                <button type="button" id="btn-save-settings">💾 Lưu cấu hình</button>
+                <button type="button" id="btn-tts-all">🎙️ Tạo toàn bộ TTS &amp; .SRT</button>
+                <button type="button" id="btn-export-kdenlive">🛠️ Xuất file .kdenlive</button>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <strong>Xuất bản Thành phẩm &amp; Đẩy thẳng lên Google Drive</strong>
+              <p style="margin:0; color:var(--text-muted); font-size:12px;">
+                Hệ thống sẽ nối toàn bộ các chương bằng GPU, đẩy file <code>.mp4</code> + <code>.srt</code> + <code>.kdenlive</code> lên Google Drive tài khoản hiện tại của bạn, trả về link và dọn sạch bộ đệm <code>D:\CLIP\temp_cache</code> về ~0 MB.
+              </p>
+              <div class="toolbar">
+                <button type="button" id="btn-render-full">🎬 1. Render Full .MP4 ngay</button>
+                <button type="button" id="btn-drive-upload-clean" class="primary">☁️ 2. Xuất lên Google Drive &amp; Dọn sạch máy (0 MB)</button>
+                <button type="button" id="btn-open-wipe-dialog" class="danger">🗑️ Dọn file tạm thủ công</button>
+              </div>
+              <div id="drive-links" class="drive-links" style="font-size:12px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Native Modal Dialog without redundant role/aria-modal -->
+  <dialog id="wipe-dialog" aria-labelledby="wipe-dialog-title">
+    <h1 id="wipe-dialog-title">Dọn sạch bộ đệm video trên D:\CLIP?</h1>
+    <p>Toàn bộ video nguồn tải tạm, audio nháp và file .mp4 trong dự án này sẽ được xóa khỏi ổ cứng máy tính (giữ lại kịch bản JSON nhẹ vài KB).</p>
+    <form method="dialog" class="dialog-actions">
+      <button value="cancel" autofocus>Hủy</button>
+      <button value="confirm" class="danger">Xóa bộ đệm ngay</button>
+    </form>
+  </dialog>
+
+  <script type="module" id="app-bundle-placeholder"></script>
+</body>
+</html>

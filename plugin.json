@@ -1,0 +1,13 @@
+{
+  "name": "movie-recap-studio",
+  "displayName": "Movie Recap Studio",
+  "version": "1.0.0",
+  "repository": "https://github.com/mihtan05/Movie-Recap",
+  "description": "Xưởng làm video Review & Tóm tắt phim (5-60 phút) ngay trong Antigravity: Storyboard 0đ API, viết kịch bản đa chương, Edge-TTS tiếng Việt, cắt cảnh chống Content ID bằng NVIDIA NVENC, xuất Kdenlive & tự động đẩy lên Google Drive (dọn sạch ổ máy 0 MB).",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Mở khung Movie Recap Studio bên phải màn hình",
+    "Làm video review dài 45 phút chia 8 chương từ link phim trên Google Drive rồi đẩy thành phẩm lên Drive",
+    "Xuất dự án hiện tại ra file MP4 bằng GPU, tải lên Google Drive và xóa sạch bộ đệm ở D:\\CLIP"
+  ]
+}
